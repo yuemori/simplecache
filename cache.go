@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"golang.org/x/sync/singleflight"
@@ -39,7 +38,7 @@ func (c *Cache[T]) GetOrSet(
 		// キャッシュから取得
 		bytes, exist, err := c.client.Get(ctx, key)
 		if err != nil {
-			log.Println(err)
+			return nil, err
 		}
 		if exist {
 			return bytes, nil
@@ -56,7 +55,7 @@ func (c *Cache[T]) GetOrSet(
 		// キャッシュに保存
 		err = c.client.Set(ctx, key, bytes, c.expiration)
 		if err != nil {
-			log.Println(err)
+			return nil, err
 		}
 		return bytes, nil
 	})
