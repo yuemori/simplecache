@@ -5,42 +5,34 @@ see: https://tech.anti-pattern.co.jp/go-cache-gen/
 ```
 go get github.com/yuemori/simplecache
 ```
-
 ## Usage
 
-```
-type userRepository struct {
-	db    *sql.DB
-	cache *cache.Cache[*user.User]
+```golang
+addr := os.GetEnv("REDIS_ADDRESS")
+pass := os.GetEnv("REDIS_PASSWORD")
+client := simplecache.NewRedisClient(addr, pass)
+
+expiration := time.Minute
+cache := cache.NewCache[*user.User](cacheClient, expiration)
+
+dsn := os.GetEnv("DSN")
+
+db, err := sqlx.Open("mysql", dsn)
+if err != nil {
+  panic(err)
 }
 
-func NewUserRepository(
-	db *sql.DB,
-	cacheClient cache.Client,
-) user.Repository {
-	return &userRepository{
-		db: db,
-		cache: cache.NewCache[*user.User](
-			cacheClient,
-			time.Minute,
-		),
-	}
-}
+ctx := context.Background()
+id := 1
 
-func (r *userRepository) GetByID(
-	ctx context.Context,
-	id int,
-) (*user.User, error) {
-	return r.cache.GetOrSet(ctx, makeUserKey(id),
-		func(ctx context.Context) (*user.User, error) {
-			var u *user.User
-			// r.dbを使ってDBから取得する
-			return u, nil
-		},
-	)
-}
+cache.GetOrSet(ctx, fmt.Sprintf("user:id:%d", id), func(ctx context.Context) (*User, error) {
+    var u *User
 
-func makeUserKey(id int) string {
-	return fmt.Sprintf("user:id:%d", id)
-}
+    if err := db.GetContext(ctx, "SELECT * FROM users WHERE id = ?", &u, id); err != nil {
+      return nil, err
+    }
+
+    return u, nil
+  },
+)
 ```
