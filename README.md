@@ -13,7 +13,7 @@ pass := os.GetEnv("REDIS_PASSWORD")
 client := simplecache.NewRedisClient(addr, pass)
 
 expiration := time.Minute
-cache := cache.NewCache[*user.User](cacheClient, expiration)
+cache := cache.NewCache[*User](cacheClient, expiration)
 
 dsn := os.GetEnv("DSN")
 
