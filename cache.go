@@ -12,6 +12,7 @@ import (
 type Client interface {
 	Get(context.Context, string) ([]byte, bool, error)
 	Set(context.Context, string, []byte, time.Duration) error
+	Del(context.Context, string) error
 }
 
 type Cache[T any] struct {
@@ -26,6 +27,13 @@ func NewCache[T any](client Client, expiration time.Duration) *Cache[T] {
 		expiration: expiration,
 		sfg:        &singleflight.Group{},
 	}
+}
+
+func (c *Cache[T]) Purge(
+	ctx context.Context,
+	key string,
+) error {
+	return c.client.Del(ctx, key)
 }
 
 func (c *Cache[T]) GetOrSet(

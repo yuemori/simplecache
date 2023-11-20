@@ -53,3 +53,16 @@ func (c *RedisClient) Set(
 	}
 	return nil
 }
+
+func (c *RedisClient) Delete(
+	ctx context.Context,
+	key string,
+	bytes []byte,
+	expiration time.Duration,
+) error {
+	err := c.c.Del(ctx, key).Err()
+	if err != nil {
+		return fmt.Errorf("failed to set to redis: %w", err)
+	}
+	return nil
+}
