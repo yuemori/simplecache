@@ -57,8 +57,6 @@ func (c *RedisClient) Set(
 func (c *RedisClient) Del(
 	ctx context.Context,
 	key string,
-	bytes []byte,
-	expiration time.Duration,
 ) error {
 	err := c.c.Del(ctx, key).Err()
 	if err != nil {
