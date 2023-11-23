@@ -12,17 +12,9 @@ type RedisClient struct {
 	c *redis.Client
 }
 
-func NewRedisClient(addr, pass string) *RedisClient {
-	c := redis.NewClient(
-		&redis.Options{
-			Addr:         addr,
-			Password:     pass,
-			PoolSize:     20,
-			MinIdleConns: 10,
-		},
-	)
+func NewRedisClient(client *redis.Client) *RedisClient {
 	return &RedisClient{
-		c: c,
+		c: client,
 	}
 }
 
@@ -39,6 +31,17 @@ func (c *RedisClient) Get(
 		return nil, false, fmt.Errorf("failed to get from redis: %w", err)
 	}
 	return bytes, true, nil
+}
+
+func (c *RedisClient) Keys(
+	ctx context.Context,
+	pattern string,
+	bytes []byte,
+	expiration time.Duration,
+) ([]string, error) {
+	cmd := c.c.Keys(ctx, pattern)
+
+	return cmd.Result()
 }
 
 func (c *RedisClient) Set(
