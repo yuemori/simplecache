@@ -54,7 +54,7 @@ func (c *RedisClient) Set(
 	return nil
 }
 
-func (c *RedisClient) Delete(
+func (c *RedisClient) Del(
 	ctx context.Context,
 	key string,
 	bytes []byte,
